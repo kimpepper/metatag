@@ -24,7 +24,7 @@ function metatag_token_info() {
     );
   }
 
-  if (module_exists('taxonomy')) {
+  if (\Drupal::moduleHandler()->moduleExists('taxonomy')) {
     $info['tokens']['term']['metatag'] = array(
       'name' => t('Metatag.'),
       'description' => t('Metatag.'),
@@ -32,7 +32,7 @@ function metatag_token_info() {
     );
   }
 
-  if (module_exists('node')) {
+  if (\Drupal::moduleHandler()->moduleExists('node')) {
     $info['tokens']['node']['metatag'] = array(
       'name' => t('Metatag.'),
       'description' => t('Metatag.'),

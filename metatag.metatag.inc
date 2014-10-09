@@ -23,7 +23,7 @@ function metatag_metatag_config_default() {
   $config->api_version = 1;
   $config->disabled = FALSE;
   $config->config = array(
-    'title' => array('value' => variable_get('site_slogan') ? '[site:name] | [site:slogan]' : '[site:name]'),
+    'title' => array('value' => \Drupal::config('metatag.settings')->get('site_slogan') ? '[site:name] | [site:slogan]' : '[site:name]'),
     'canonical' => array('value' => '[site:url]'),
     'shortlink' => array('value' => '[site:url]'),
   );
@@ -59,7 +59,7 @@ function metatag_metatag_config_default() {
   );
   $configs[$config->instance] = $config;
 
-  if (module_exists('taxonomy')) {
+  if (\Drupal::moduleHandler()->moduleExists('taxonomy')) {
     $config = new stdClass();
     $config->instance = 'taxonomy_term';
     $config->api_version = 1;
@@ -84,7 +84,7 @@ function metatag_metatag_config_default() {
   // extending the "real" defaults before they can then be altered by other
   // modules.
   // See hook_metatag_bundled_config_alter() in the API documentation.
-  drupal_alter('metatag_bundled_config', $configs);
+  \Drupal::moduleHandler()->alter('metatag_bundled_config', $configs);
 
   return $configs;
 }
@@ -99,7 +99,7 @@ function metatag_metatag_config_instance_info() {
   $info['global:404']       = array('label' => t('404 page not found'));
 
   // Add instance information for entities.
-  $entity_types = entity_get_info();
+  $entity_types = \Drupal::entityManager()->getDefinitions();
   foreach ($entity_types as $entity_type => $entity_info) {
     if (metatag_entity_supports_metatags($entity_type)) {
       $info[$entity_type] = array('label' => $entity_info['label']);
@@ -171,27 +171,29 @@ function metatag_metatag_info() {
   );
 
   // More advanced meta tags.
-  $info['tags']['robots'] = array(
-    'label' => t('Robots'),
-    'description' => t("Provides search engines with specific directions for what to do when this page is indexed."),
-    'class' => 'DrupalListMetaTag',
-    'group' => 'advanced',
-    'weight' => ++$weight,
-    'form' => array(
-      '#options' => array(
-        'index' => t('Allow search engines to index this page (assumed).'),
-        'follow' => t('Allow search engines to follow links on this page (assumed).'),
-        'noindex' => t('Prevents search engines from indexing this page.'),
-        'nofollow' => t('Prevents search engines from following links on this page.'),
-        'noarchive' => t('Prevents cached copies of this page from appearing in search results.'),
-        'nosnippet' => t('Prevents descriptions from appearing in search results, and prevents page caching.'),
-        'noodp' => t('Blocks the !opendirectory description from appearing in search results.', array('!opendirectory' => l('Open Directory Project', 'http://www.dmoz.org/'))),
-        'noydir' => t('Prevents Yahoo! from listing this page in the <a href="@ydir">Yahoo! Directory</a>.', array('@ydir' => 'http://dir.yahoo.com/')),
-        'noimageindex' => t('Prevent search engines from indexing images on this page.'),
-        'notranslate' => t('Prevent search engines from offering to translation this page in search results.'),
-      ),
-    ),
-  );
+  // @FIXME Provide a valid URL, generated from a route name, as the second argument to l(). See https://www.drupal.org/node/2346779 for more information.
+// $info['tags']['robots'] = array(
+//     'label' => t('Robots'),
+//     'description' => t("Provides search engines with specific directions for what to do when this page is indexed."),
+//     'class' => 'DrupalListMetaTag',
+//     'group' => 'advanced',
+//     'weight' => ++$weight,
+//     'form' => array(
+//       '#options' => array(
+//         'index' => t('Allow search engines to index this page (assumed).'),
+//         'follow' => t('Allow search engines to follow links on this page (assumed).'),
+//         'noindex' => t('Prevents search engines from indexing this page.'),
+//         'nofollow' => t('Prevents search engines from following links on this page.'),
+//         'noarchive' => t('Prevents cached copies of this page from appearing in search results.'),
+//         'nosnippet' => t('Prevents descriptions from appearing in search results, and prevents page caching.'),
+//         'noodp' => t('Blocks the !opendirectory description from appearing in search results.', array('!opendirectory' => l('Open Directory Project', 'http://www.dmoz.org/'))),
+//         'noydir' => t('Prevents Yahoo! from listing this page in the <a href="@ydir">Yahoo! Directory</a>.', array('@ydir' => 'http://dir.yahoo.com/')),
+//         'noimageindex' => t('Prevent search engines from indexing images on this page.'),
+//         'notranslate' => t('Prevent search engines from offering to translation this page in search results.'),
+//       ),
+//     ),
+//   );
+
 
   $info['tags']['news_keywords'] = array(
     'label' => t('Google News Keywords'),

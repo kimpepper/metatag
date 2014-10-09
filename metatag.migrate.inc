@@ -83,7 +83,7 @@ class MigrateMetatagHandler extends MigrateDestinationHandler {
 
   public function __construct() {
     $entity_types = array();
-    foreach (entity_get_info() as $entity_type => $entity_info) {
+    foreach (\Drupal::entityManager()->getDefinitions() as $entity_type => $entity_info) {
       if (isset($entity_info['metatags']) && $entity_info['metatags']) {
         $entity_types[] = $entity_type;
       }

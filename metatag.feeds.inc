@@ -39,7 +39,7 @@ function metatag_feeds_set_target($source, $entity, $target, $value) {
     $entity_id = $entity->feeds_item->entity_id;
 
     // Load the existing entity.
-    $stored_entities = entity_load($entity_type, array($entity_id));
+    $stored_entities = \Drupal::entityManager()->getStorage($entity_type)->loadMultiple(array($entity_id));
     if (!empty($stored_entities)) {
       $stored_entity = reset($stored_entities);
       if (!empty($stored_entity)) {

@@ -207,7 +207,7 @@ class DrupalTextMetaTag extends DrupalDefaultMetaTag {
     if (empty($options['raw'])) {
       // Give other modules the opportunity to use hook_metatag_pattern_alter()
       // to modify defined token patterns and values before replacement.
-      drupal_alter('metatag_pattern', $value, $options['token data'], $this->info['name']);
+      \Drupal::moduleHandler()->alter('metatag_pattern', $value, $options['token data'], $this->info['name']);
       $value = token_replace($value, $options['token data'], $options);
     }
     return $this->tidyValue($value);
@@ -337,7 +337,7 @@ class DrupalDateIntervalMetaTag extends DrupalDefaultMetaTag {
       $interval = intval($this->data['value']);
       if (!empty($interval) && !empty($this->data['period'])) {
         $period = $this->data['period'];
-        $value = format_plural($interval, '@count ' . $period, '@count ' . $period . 's');
+        $value = \Drupal::translation()->formatPlural($interval, '@count ' . $period, '@count ' . $period . 's');
       }
     }
     return $value;

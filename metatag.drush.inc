@@ -8,7 +8,7 @@
  * Implements hook_drush_cache_clear().
  */
 function metatag_drush_cache_clear(&$types) {
-  if (function_exists('module_exists') && module_exists('metatag')) {
+  if (function_exists('module_exists') && \Drupal::moduleHandler()->moduleExists('metatag')) {
     $types['metatag'] = 'drush_metatag_cache_clear_token_info';
   }
 }

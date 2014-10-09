@@ -4,6 +4,8 @@
  * Primary hook implementations for Metatag.
  */
 
+use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Language\Language;
 /**
  * Implements hook_help().
  */
@@ -15,7 +17,8 @@ function metatag_help($path, $arg) {
     return '<p>' . t('The Metatag module provides a options to let each page have customized meta data added to the "meta" tags in the HEAD section of the document.') . '</p>';
   }
   elseif ($path == 'admin/config/search/metatags/bulk-revert') {
-    return '<p>' . t('This form <strong>will wipe out</strong> all custom meta tags for the selected entities, reverting them to the default configuration assigned at the <a href="@url">Defaults tab</a>. For example, if the meta tags are changed for an article they will be removed if the "Node: Article" checkbox is selected.', array('@url' => url('admin/config/search/metatags'))) . '</p>';
+    // return '<p>' . t('This form <strong>will wipe out</strong> all custom meta tags for the selected entities, reverting them to the default configuration assigned at the <a href="@url">Defaults tab</a>. For example, if the meta tags are changed for an article they will be removed if the "Node: Article" checkbox is selected.', array('@url' => url('admin/config/search/metatags'))) . '</p>';
+
   }
 }
 
@@ -92,7 +95,7 @@ function metatag_permission() {
   );
 
   // Optional extended edit permissions.
-  if (variable_get('metatag_extended_permissions', FALSE)) {
+  if (\Drupal::config('metatag.settings')->get('metatag_extended_permissions')) {
     $permissions['edit meta tags']['description'] .= '<br />' . t('<em>Extended Permissions</em> has been enabled. Roles have the :admin permission will see all meta tags on edit forms, otherwise the permissions below will control which meta tags are available and are needed in addition to <em>Edit meta tags</em>.', array(':admin' => t('Administer meta tags')));
     $metatags = metatag_get_info();
     foreach ($metatags['tags'] as $metatag_name => $metatag) {
@@ -269,8 +272,12 @@ function metatag_config_load($instance) {
  */
 function metatag_config_load_multiple(array $instances) {
   // Load the data.
-  ctools_include('export');
-  $configs = ctools_export_load_object('metatag_config', 'names', $instances);
+  // @FIXME: Most CTools APIs have moved into core. For more information, see https://www.drupal.org/node/2164623
+// ctools_include('export');
+
+  // @FIXME: The CTools Export API has into core in the form of exportable configuration and content entities. For more information, see https://www.drupal.org/developing/api/entity
+// $configs = ctools_export_load_object('metatag_config', 'names', $instances);
+
 
   // "Fix" any records that might be using old values. Ideally these will be
   // permanently fixed by being re-saved or re-exported.
@@ -318,7 +325,7 @@ function metatag_config_save($config) {
 
   // Allow modules to alter the configuration before it is saved using
   // hook_metatag_config_presave().
-  module_invoke_all('metatag_config_presave', $config);
+  \Drupal::moduleHandler()->invokeAll('metatag_config_presave', [$config]);
 
   // Update the i18n string
   if (function_exists('i18n_string_update')) {
@@ -335,14 +342,14 @@ function metatag_config_save($config) {
 
     // Allow modules to act upon the record insertion using
     // hook_metatag_config_insert().
-    module_invoke_all('metatag_config_insert', $config);
+    \Drupal::moduleHandler()->invokeAll('metatag_config_insert', [$config]);
   }
   else {
     drupal_write_record('metatag_config', $config, array('cid'));
 
     // Allow modules to act upon the record update using
     // hook_metatag_config_insert().
-    module_invoke_all('metatag_config_update', $config);
+    \Drupal::moduleHandler()->invokeAll('metatag_config_update', [$config]);
   }
 
   unset($config->is_new);
@@ -371,8 +378,12 @@ function metatag_config_cache_clear() {
   drupal_static_reset('metatag_config_load_with_defaults');
   drupal_static_reset('metatag_entity_has_metatags');
   drupal_static_reset('metatag_entity_supports_metatags');
-  ctools_include('export');
-  ctools_export_load_object_reset('metatag_config');
+  // @FIXME: Most CTools APIs have moved into core. For more information, see https://www.drupal.org/node/2164623
+// ctools_include('export');
+
+  // @FIXME: The CTools Export API has into core in the form of exportable configuration and content entities. For more information, see https://www.drupal.org/developing/api/entity
+// ctools_export_load_object_reset('metatag_config');
+
 }
 
 /**
@@ -411,24 +422,24 @@ function metatag_metatags_load_multiple($entity_type, array $entity_ids, array $
 
   // Also need to check if the metatag table exists since this condition could
   // fire before the table has been installed yet.
-  if (!variable_get('metatag_schema_installed', FALSE)) {
+  if (!\Drupal::config('metatag.settings')->get('metatag_schema_installed')) {
     if (db_table_exists('metatag')) {
-      variable_set('metatag_schema_installed', TRUE);
+      \Drupal::config('metatag.settings')->set('metatag_schema_installed', TRUE);
     }
     else {
-      watchdog('metatag', 'The system tried to load metatag data before the schema was fully loaded.', array(), WATCHDOG_WARNING);
+      \Drupal::logger('metatag')->warning('The system tried to load metatag data before the schema was fully loaded.');
       return array();
     }
   }
 
   // Verify that the metatag.revision_id field has been added to the {metatag}
   // table schema.
-  if (!variable_get('metatag_has_revision_id', FALSE)) {
+  if (!\Drupal::config('metatag.settings')->get('metatag_has_revision_id')) {
     if (db_field_exists('metatag', 'revision_id')) {
-      variable_set('metatag_has_revision_id', TRUE);
+      \Drupal::config('metatag.settings')->set('metatag_has_revision_id', TRUE);
     }
     else {
-      watchdog('metatag', 'The database updates need to be ran.', array(), WATCHDOG_WARNING);
+      \Drupal::logger('metatag')->warning('The database updates need to be ran.');
       return array();
     }
   }
@@ -488,7 +499,7 @@ function metatag_metatags_save($entity_type, $entity_id, $revision_id, $metatags
   // has-no-language language.
   $languages = language_list();
   if (empty($langcode) || !isset($languages[$langcode])) {
-    $langcode = LANGUAGE_NONE;
+    $langcode = Language::LANGCODE_NOT_SPECIFIED;
   }
 
   // Check that $entity_id is numeric because of Entity API and string IDs.
@@ -525,7 +536,7 @@ function metatag_metatags_save($entity_type, $entity_id, $revision_id, $metatags
   foreach ($metatags as $langcode => $new_metatags) {
     // Allow other modules to alter the meta tags prior to saving using
     // hook_metatag_presave().
-    foreach (module_implements('metatag_presave') as $module) {
+    foreach (\Drupal::moduleHandler()->getImplementations('metatag_presave') as $module) {
       $function = "{$module}_metatag_presave";
       $function($new_metatags, $entity_type, $entity_id, $revision_id, $langcode);
     }
@@ -603,7 +614,7 @@ function metatag_metatags_delete_multiple($entity_type, array $entity_ids, array
     try {
       // Let other modules know about the records being deleted using
       // hook_metatag_metatags_delete().
-      module_invoke_all('metatag_metatags_delete', $entity_type, $entity_ids, $revision_ids, $langcode);
+      \Drupal::moduleHandler()->invokeAll('metatag_metatags_delete', [$entity_type, $entity_ids, $revision_ids, $langcode]);
 
       // Set the entity to delete.
       $query = db_delete('metatag')
@@ -660,11 +671,13 @@ function metatag_metatags_cache_clear($entity_type, $entity_ids = NULL) {
 function metatag_entity_load($entities, $entity_type) {
   // Get the revision_ids.
   $revision_ids = array();
+  /** @var Drupal\Core\Entity\EntityInterface $entity */
   foreach ($entities as $key => $entity) {
-    list($entity_id, $revision_id) = entity_extract_ids($entity_type, $entity);
-    $revision_id = intval($revision_id);
-    if (!empty($revision_id)) {
-      $revision_ids[] = $revision_id;
+    if ($entity instanceof Drupal\Core\Entity\RevisionableInterface) {
+      $revision_id = $entity->getRevisionId();
+      if (!empty($revision_id)) {
+        $revision_ids[] = $revision_id;
+      }
     }
   }
 
@@ -676,20 +689,20 @@ function metatag_entity_load($entities, $entity_type) {
 
       // Assign the metatag records for the correct revision ID.
       foreach ($entities as $entity_id => $entity) {
-        list($entity_id, $revision_id) = entity_extract_ids($entity_type, $entity);
-        $revision_id = intval($revision_id);
+        $entity_id = $entity->id();
+        $revision_id = $entity->getRevisionId();
         $entities[$entity_id]->metatags = isset($metatags[$entity_id][$revision_id]) ? $metatags[$entity_id][$revision_id] : array();
       }
     }
   }
   catch (Exception $e) {
-    watchdog('metatag', 'Error loading meta tag data, do the <a href="@update">database updates</a> need to be run? The error occurred when loading record(s) %ids for the %type entity type. The error message was: %error', array('@update' => base_path() . 'update.php', '%ids' => implode(', ', array_keys($entities)), '%type' => $entity_type, '%error' => $e->getMessage()), WATCHDOG_WARNING);
+    \Drupal::logger('metatag')->warning('Error loading meta tag data, do the <a href="@update">database updates</a> need to be run? The error occurred when loading record(s) %ids for the %type entity type. The error message was: %error', array('@update' => base_path() . 'update.php', '%ids' => implode(', ', array_keys($entities)), '%type' => $entity_type, '%error' => $e->getMessage()));
     // Don't display the same message twice for Drush.
-    if (drupal_is_cli()) {
+    if (PHP_SAPI === "cli") {
       drupal_set_message(t('Run your updates, like drush updb.'));
     }
     // Only message people who can see it in watchdog and can likely fix it.
-    elseif (user_access('access site reports')) {
+    elseif (\Drupal::currentUser()->hasPermission('access site reports')) {
       drupal_set_message(t('Error loading meta tag data, do the <a href="@update">database updates</a> need to be run?', array('@update' => base_path() . 'update.php')), 'error');
     }
   }
@@ -698,31 +711,31 @@ function metatag_entity_load($entities, $entity_type) {
 /**
  * Implements hook_entity_insert().
  */
-function metatag_entity_insert($entity, $entity_type) {
+function metatag_entity_insert(ContentEntityInterface $entity, $entity_type) {
   if (isset($entity->metatags)) {
-    list($entity_id, $revision_id) = entity_extract_ids($entity_type, $entity);
-    $revision_id = intval($revision_id);
+   $entity_id = $entity->id();
+    $revision_id = $entity->getRevisionId();
 
     // Determine the entity's language.
-    $langcode = entity_language($entity_type, $entity);
+    $langcode = $entity->language();
 
     // Unfortunately due to how core works, the normal entity_language()
     // function returns 'und' instead of the node's language during node
     // creation.
-    if ((empty($langcode) || $langcode == LANGUAGE_NONE) && !empty($entity->language)) {
+    if ((empty($langcode) || $langcode == Language::LANGCODE_NOT_SPECIFIED) && !empty($entity->language)) {
       $langcode = $entity->language;
     }
 
     // If no language was still found, use the 'no language' value.
     if (empty($langcode)) {
-      $langcode = LANGUAGE_NONE;
+      $langcode = Language::LANGCODE_NOT_SPECIFIED;
     }
 
     // Work-around for initial entity creation where a language was selection
     // but where it's different to the form's value.
-    if (!isset($entity->metatags[$langcode]) && isset($entity->metatags[LANGUAGE_NONE])) {
-      $entity->metatags[$langcode] = $entity->metatags[LANGUAGE_NONE];
-      unset($entity->metatags[LANGUAGE_NONE]);
+    if (!isset($entity->metatags[$langcode]) && isset($entity->metatags[Language::LANGCODE_NOT_SPECIFIED])) {
+      $entity->metatags[$langcode] = $entity->metatags[Language::LANGCODE_NOT_SPECIFIED];
+      unset($entity->metatags[Language::LANGCODE_NOT_SPECIFIED]);
     }
 
     // Support for Workbench Moderation v1.
@@ -737,13 +750,13 @@ function metatag_entity_insert($entity, $entity_type) {
 /**
  * Implements hook_entity_update().
  */
-function metatag_entity_update($entity, $entity_type) {
+function metatag_entity_update(ContentEntityInterface $entity, $entity_type) {
   if (!metatag_entity_supports_metatags($entity_type)) {
     return;
   }
 
-  list($entity_id, $revision_id) = entity_extract_ids($entity_type, $entity);
-  $revision_id = intval($revision_id);
+  $entity_id = $entity->id();
+  $revision_id = $entity->getRevisionId();
 
   if (isset($entity->metatags)) {
     // Determine the entity's new language. This will always be accurate as the
@@ -801,18 +814,15 @@ function metatag_entity_update($entity, $entity_type) {
 /**
  * Implements hook_entity_delete().
  */
-function metatag_entity_delete($entity, $entity_type) {
-  list($entity_id) = entity_extract_ids($entity_type, $entity);
-  metatag_metatags_delete($entity_type, $entity_id);
+function metatag_entity_delete(ContentEntityInterface $entity, $entity_type) {
+  metatag_metatags_delete($entity_type, $entity->id());
 }
 
 /**
  * Implements hook_field_attach_delete_revision().
  */
-function metatag_field_attach_delete_revision($entity_type, $entity) {
-  list($entity_id, $revision_id) = entity_extract_ids($entity_type, $entity);
-  $revision_id = intval($revision_id);
-  metatag_metatags_delete($entity_type, $entity_id, $revision_id);
+function metatag_field_attach_delete_revision($entity_type, ContentEntityInterface $entity) {
+  metatag_metatags_delete($entity_type, $entity->id(), $entity->getRevisionId());
 }
 
 /**
@@ -821,7 +831,7 @@ function metatag_field_attach_delete_revision($entity_type, $entity) {
  * Provides additional argument to allow the display to be forced, to work
  * around problems elsewhere in the APIs.
  */
-function metatag_entity_view($entity, $entity_type, $view_mode, $langcode, $force = FALSE) {
+function metatag_entity_view(ContentEntityInterface $entity, $entity_type, $view_mode, $langcode, $force = FALSE) {
   // Only run this function once per page load.
   static $i_will_say_this_only_once = FALSE;
 
@@ -844,7 +854,7 @@ function metatag_entity_view($entity, $entity_type, $view_mode, $langcode, $forc
 
     // Generate metatags output.
     if ($output = metatag_generate_entity_metatags($entity, $entity_type, $langcode, $view_mode)) {
-      list($entity_id, $revision_id, $bundle) = entity_extract_ids($entity_type, $entity);
+      $bundle = $entity->bundle();
       $instance = "{$entity_type}:{$bundle}";
       // We need to register the term's metatags, so we can later fetch them.
       // @see metatag_page_build().
@@ -871,15 +881,15 @@ function metatag_entity_view($entity, $entity_type, $view_mode, $langcode, $forc
  * @return array
  *   A renderable array of metatags for the given entity.
  */
-function metatag_generate_entity_metatags($entity, $entity_type, $langcode = NULL, $view_mode = 'full', $cached = TRUE) {
+function metatag_generate_entity_metatags(ContentEntityInterface $entity, $entity_type, $langcode = NULL, $view_mode = 'full', $cached = TRUE) {
   // If this entity object isn't allowed meta tags, don't continue.
   if (!metatag_entity_has_metatags($entity_type, $entity)) {
     return array();
   }
 
   // Obtain some details of the entity that are needed elsewhere.
-  list($entity_id, $revision_id, $bundle) = entity_extract_ids($entity_type, $entity);
-  $revision_id = intval($revision_id);
+  $entity_id = $entity->id();
+  $revision_id = $entity->getRevisionId();
 
   // Check if a specific metatag config exists, otherwise just use the global
   // one, stripping out the bundle.
@@ -900,8 +910,8 @@ function metatag_generate_entity_metatags($entity, $entity_type, $langcode = NUL
   // This entity doesn't have any languages defined, i.e. it uses 'und'. This
   // can't conflict with loading the wrong language as entities either have no
   // language or they have specific one(s), they can't have both.
-  if ($entity_language == LANGUAGE_NONE) {
-    $langcode = LANGUAGE_NONE;
+  if ($entity_language == Language::LANGCODE_NOT_SPECIFIED) {
+    $langcode = Language::LANGCODE_NOT_SPECIFIED;
   }
 
   // If there are no meta tags for the currently identified language, and there
@@ -909,7 +919,7 @@ function metatag_generate_entity_metatags($entity, $entity_type, $langcode = NUL
   // default language's values, unless the "Don't load entity's default
   // language values if no languages match" option is enabled on the advanced
   // settings page.
-  elseif (empty($entity->metatags[$langcode]) && !empty($entity->metatags[$entity_language]) && !variable_get('metatag_entity_no_lang_default', FALSE)) {
+  elseif (empty($entity->metatags[$langcode]) && !empty($entity->metatags[$entity_language]) && !\Drupal::config('metatag.settings')->get('metatag_entity_no_lang_default')) {
     $langcode = $entity_language;
   }
 
@@ -957,7 +967,7 @@ function metatag_generate_entity_metatags($entity, $entity_type, $langcode = NUL
 
     // Reload the entity object from cache as it may have been altered.
     $token_type = token_get_entity_mapping('entity', $entity_type);
-    $entities = entity_load($entity_type, array($entity_id));
+    $entities = \Drupal::entityManager()->getStorage($entity_type)->loadMultiple(array($entity_id));
     $options['token data'][$token_type] = $entities[$entity_id];
     $options['entity'] = $entities[$entity_id];
 
@@ -985,7 +995,7 @@ function metatag_generate_entity_metatags($entity, $entity_type, $langcode = NUL
  *   A renderable array of metatags for the given entity.
  */
 function metatags_get_entity_metatags($entity_id, $entity_type, $langcode = NULL) {
-  $entities = entity_load($entity_type, array($entity_id));
+  $entities = \Drupal::entityManager()->getStorage($entity_type)->loadMultiple(array($entity_id));
   $entity = reset($entities);
   return !empty($entity) ? metatag_generate_entity_metatags($entity, $entity_type, $langcode) : array();
 }
@@ -1020,8 +1030,8 @@ function metatag_metatags_view($instance, array $metatags = array(), array $opti
       $metatags = $metatags[$options['language']->language];
     }
     // If no language requested, use the no-language value.
-    elseif (!empty($metatags[LANGUAGE_NONE])) {
-      $metatags = $metatags[LANGUAGE_NONE];
+    elseif (!empty($metatags[Language::LANGCODE_NOT_SPECIFIED])) {
+      $metatags = $metatags[Language::LANGCODE_NOT_SPECIFIED];
     }
     else {
       $metatags = array();
@@ -1042,7 +1052,7 @@ function metatag_metatags_view($instance, array $metatags = array(), array $opti
 
   // Allow the output meta tags to be modified using
   // hook_metatag_metatags_view_alter().
-  drupal_alter('metatag_metatags_view', $output, $instance, $options);
+  \Drupal::moduleHandler()->alter('metatag_metatags_view', $output, $instance, $options);
 
   return $output;
 }
@@ -1094,7 +1104,7 @@ function metatag_metatags_form(array &$form, $instance, array $metatags = array(
   }
 
   // Work out the language code to use, default to NONE.
-  $langcode = LANGUAGE_NONE;
+  $langcode = Language::LANGCODE_NOT_SPECIFIED;
   if (isset($form['#entity_type']) && isset($form['#entity'])) {
     $langcode = metatag_entity_get_language($form['#entity_type'], $form['#entity']);
   }
@@ -1113,7 +1123,7 @@ function metatag_metatags_form(array &$form, $instance, array $metatags = array(
     '#collapsed' => TRUE,
     '#multilingual' => TRUE,
     '#tree' => TRUE,
-    '#access' => user_access('edit meta tags') || user_access('administer meta tags'),
+    '#access' => \Drupal::currentUser()->hasPermission('edit meta tags') || \Drupal::currentUser()->hasPermission('administer meta tags'),
     '#weight' => 40,
     '#language' => $langcode,
     '#attributes' => array(
@@ -1141,7 +1151,7 @@ function metatag_metatags_form(array &$form, $instance, array $metatags = array(
   }
 
   // Only support vertical tabs if there is a vertical tab element.
-  foreach (element_children($form) as $key) {
+  foreach (\Drupal\Core\Render\Element::children($form) as $key) {
     if (isset($form[$key]['#type']) && $form[$key]['#type'] == 'vertical_tabs') {
       $form['metatags']['#group'] = $key;
       $form['metatags']['#attached']['js']['vertical-tabs'] = drupal_get_path('module', 'metatag') . '/metatag.vertical-tabs.js';
@@ -1181,8 +1191,8 @@ function metatag_metatags_form(array &$form, $instance, array $metatags = array(
     }
 
     // Optional extended edit permissions.
-    if (variable_get('metatag_extended_permissions', FALSE)) {
-      $metatag_form['#access'] = user_access('edit meta tag: ' . $metatag) || user_access('administer meta tags');
+    if (\Drupal::config('metatag.settings')->get('metatag_extended_permissions')) {
+      $metatag_form['#access'] = \Drupal::currentUser()->hasPermission('edit meta tag: ' . $metatag) || \Drupal::currentUser()->hasPermission('administer meta tags');
     }
     else {
       $metatag_form['#access'] = $form['metatags']['#access'];
@@ -1204,8 +1214,8 @@ function metatag_metatags_form(array &$form, $instance, array $metatags = array(
 
       // Hide the fieldset itself if there is not at least one of the meta tag
       // fields visible.
-      if (variable_get('metatag_extended_permissions', FALSE)) {
-        $form['metatags'][$langcode][$group_key]['#access'] = count(element_get_visible_children($form['metatags'][$langcode][$group_key])) > 0;
+      if (\Drupal::config('metatag.settings')->get('metatag_extended_permissions')) {
+        $form['metatags'][$langcode][$group_key]['#access'] = count(\Drupal\Core\Render\Element::getVisibleChildren($form['metatags'][$langcode][$group_key])) > 0;
       }
       else {
         $form['metatags'][$langcode][$group_key]['#access'] = $form['metatags']['#access'];
@@ -1222,15 +1232,15 @@ function metatag_metatags_form(array &$form, $instance, array $metatags = array(
   // Hide the fieldset itself if there is not at least one of the meta tag
   // fields visible; only bother checking this if the user had edit access in
   // the first place.
-  if ($form['metatags']['#access'] && variable_get('metatag_extended_permissions', FALSE)) {
-    $form['metatags']['#access'] = count(element_get_visible_children($form['metatags'][$langcode])) > 0;
+  if ($form['metatags']['#access'] && \Drupal::config('metatag.settings')->get('metatag_extended_permissions')) {
+    $form['metatags']['#access'] = count(\Drupal\Core\Render\Element::getVisibleChildren($form['metatags'][$langcode])) > 0;
   }
 
   // Check the #access of each group. If it passed, we display options for
   // tokens. By this we update the #description of each group.
   if ($form['metatags']['#access']) {
     // Built the token list.
-    $token_listing_link = theme('token_tree', array('token_types' => $options['token types'], 'dialog' => TRUE));
+    $token_listing_link = _theme('token_tree', array('token_types' => $options['token types'], 'dialog' => TRUE));
 
     // Add the token list to the top of the fieldset.
     $form['metatags'][$langcode]['#description'] = $token_listing_link;
@@ -1293,7 +1303,7 @@ function metatag_metatags_form_submit($form, &$form_state) {
  */
 function metatag_field_extra_fields() {
   $extra = array();
-  foreach (entity_get_info() as $entity_type => $entity_info) {
+  foreach (\Drupal::entityManager()->getDefinitions() as $entity_type => $entity_info) {
     foreach (array_keys($entity_info['bundles']) as $bundle) {
       if (metatag_entity_supports_metatags($entity_type, $bundle)) {
         $extra[$entity_type][$bundle]['form']['metatags'] = array(
@@ -1318,7 +1328,7 @@ function metatag_field_extra_fields() {
  * @return boolean
  *   TRUE or FALSE if the entity should have a form for or process meta tags.
  */
-function metatag_entity_has_metatags($entity_type, $entity) {
+function metatag_entity_has_metatags($entity_type, ContentEntityInterface $entity) {
   // If an entity has custom meta tags assigned, then we should return TRUE.
   if (!empty($entity->metatags)) {
     return TRUE;
@@ -1329,7 +1339,7 @@ function metatag_entity_has_metatags($entity_type, $entity) {
   // If no configuration exists, then we should not be displaying the meta tag
   // forms or processing meta tags on entity view.
   $config_exists = &drupal_static(__FUNCTION__, array());
-  list( , , $bundle) = entity_extract_ids($entity_type, $entity);
+  $bundle = $entity->bundle();
   // Do not pretend to have metatags when the bundle does not support them.
   if (!metatag_entity_supports_metatags($entity_type, $bundle)) {
     return FALSE;
@@ -1355,13 +1365,15 @@ function metatag_entity_supports_metatags($entity_type = NULL, $bundle = NULL) {
 
   if (!isset($entity_types)) {
     $entity_types = array();
-    foreach (entity_get_info() as $entity_type_key => $entity_info) {
-      if (empty($entity_info['metatags'])) {
-        $entity_types[$entity_type_key] = FALSE;
+    /** @var \Drupal\Core\Entity\EntityTypeInterface $type */
+    foreach (\Drupal::entityManager()->getDefinitions() as $type) {
+      $metatags = $type->get('metatags');
+      if (empty($metatags) {
+        $entity_types[$type->id()] = FALSE;
         continue;
       }
-      $entity_types[$entity_type_key] = array();
-      foreach ($entity_info['bundles'] as $bundle_key => $bundle_info) {
+      $entity_types[$type->id()] = array();
+      foreach ($type->['bundles'] as $bundle_key => $bundle_info) {
         $entity_types[$entity_type_key][$bundle_key] = !isset($bundle_info['metatags']) || !empty($bundle_info['metatags']);
       }
     }
@@ -1375,7 +1387,7 @@ function metatag_entity_supports_metatags($entity_type = NULL, $bundle = NULL) {
     // $conf['metatag_enable_node__carousel'] = FALSE;
     //
     // @see Advanced settings page.
-    if (variable_get('metatag_enable_' . $entity_type . '__' . $bundle, 'monkey') == FALSE) {
+    if (\Drupal::config('metatag.settings')->get('metatag_enable_' . $entity_type . '__' . $bundle) == FALSE) {
       return FALSE;
     }
 
@@ -1389,7 +1401,7 @@ function metatag_entity_supports_metatags($entity_type = NULL, $bundle = NULL) {
     // $conf['metatag_enable_file'] = FALSE;
     //
     // @see Advanced settings page.
-    if (variable_get('metatag_enable_' . $entity_type, 'monkey') == FALSE) {
+    if (\Drupal::config('metatag.settings')->get('metatag_enable_' . $entity_type) == FALSE) {
       return FALSE;
     }
 
@@ -1421,7 +1433,7 @@ function metatag_entity_info_alter(&$info) {
   // Just running taxonomy_vocabulary_load() here would cause problems for
   // EntityCache in certain circumstances, so instead the query is executed
   // directly instead.
-  if (module_exists('forum') && ($vocab_id = variable_get('forum_nav_vocabulary', 0))) {
+  if (\Drupal::moduleHandler()->moduleExists('forum') && ($vocab_id = \Drupal::config('metatag.settings')->get('forum_nav_vocabulary'))) {
     $vocab_name = db_query("SELECT machine_name FROM {taxonomy_vocabulary} WHERE vid = :vid", array(':vid' => $vocab_id))->fetchField();
     if (!empty($vocab_name)) {
       $defaults['taxonomy_term']['bundles'][$vocab_name]['path'] = 'forum/%taxonomy_term';
@@ -1449,7 +1461,7 @@ function metatag_load_entity_from_path($path) {
 
   if (!isset($entity_paths)) {
     $entity_paths = array();
-    foreach (entity_get_info() as $entity_type => $entity_info) {
+    foreach (\Drupal::entityManager()->getDefinitions() as $entity_type => $entity_info) {
       if (isset($entity_info['default path'])) {
         $default_path = $entity_info['default path'];
         $default_path = preg_quote($default_path, '/');
@@ -1461,7 +1473,7 @@ function metatag_load_entity_from_path($path) {
 
   foreach ($entity_paths as $entity_type => $default_path) {
     if (preg_match("/^{$default_path}$/", $path, $matches)) {
-      if ($entity = entity_load($entity_type, array($matches[1]))) {
+      if ($entity = \Drupal::entityManager()->getStorage($entity_type)->loadMultiple(array($matches[1]))) {
         $result = array('entity_type' => $entity_type, 'entity' => reset($entity));
       }
       break;
@@ -1470,7 +1482,7 @@ function metatag_load_entity_from_path($path) {
 
   // Allow other modules to customize the data using
   // hook_metatag_load_entity_from_path_alter().
-  drupal_alter('metatag_load_entity_from_path', $path, $result);
+  \Drupal::moduleHandler()->alter('metatag_load_entity_from_path', $path, $result);
 
   return $result;
 }
@@ -1502,7 +1514,7 @@ function metatag_page_get_metatags() {
 function metatag_page_build(&$page) {
   // By default do not add meta tags to admin pages. To enable meta tags on
   // admin pages set the 'metatag_tag_admin_pages' variable to TRUE.
-  if (path_is_admin(current_path()) && !variable_get('metatag_tag_admin_pages', FALSE)) {
+  if (path_is_admin(current_path()) && !\Drupal::config('metatag.settings')->get('metatag_tag_admin_pages')) {
     return;
   }
 
@@ -1545,7 +1557,7 @@ function metatag_page_build(&$page) {
 
   // If no meta tags were loaded at least load the global defaults. This may be
   // disabled, see README.txt for details.
-  if (empty($page['content']['metatags']) && variable_get('metatag_load_all_pages', TRUE)) {
+  if (empty($page['content']['metatags']) && \Drupal::config('metatag.settings')->get('metatag_load_all_pages')) {
     $instance = 'global';
 
     // Generate the cache ID.
@@ -1628,7 +1640,7 @@ function metatag_field_attach_delete_bundle($entity_type, $bundle) {
 /**
  * Implements hook_field_attach_form().
  */
-function metatag_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
+function metatag_field_attach_form($entity_type, ContentEntityInterface $entity, &$form, &$form_state, $langcode) {
   if (!metatag_entity_has_metatags($entity_type, $entity)) {
     return;
   }
@@ -1637,7 +1649,7 @@ function metatag_field_attach_form($entity_type, $entity, &$form, &$form_state, 
     return;
   }
 
-  list($entity_id, $revision_id, $bundle) = entity_extract_ids($entity_type, $entity);
+  $bundle = $entity->bundle();
   $instance = "{$entity_type}:{$bundle}";
 
   // Grab the meta tags for display in the form if there are any.
@@ -1647,7 +1659,7 @@ function metatag_field_attach_form($entity_type, $entity, &$form, &$form_state, 
 
     // If this is a new translation using Entity Translation, load the meta
     // tags from the entity's original language.
-    if (module_exists('entity_translation') && empty($form['#entity_translation_source_form']) && ($handler = entity_translation_entity_form_get_handler($form, $form_state)) && isset($entity->metatags[$handler->getSourceLanguage()])) {
+    if (\Drupal::moduleHandler()->moduleExists('entity_translation') && empty($form['#entity_translation_source_form']) && ($handler = entity_translation_entity_form_get_handler($form, $form_state)) && isset($entity->metatags[$handler->getSourceLanguage()])) {
       $metatags = $entity->metatags[$handler->getSourceLanguage()];
     }
     // Determine from where we should get the tags.
@@ -1675,7 +1687,7 @@ function metatag_field_attach_form($entity_type, $entity, &$form, &$form_state, 
   $options['token types'] = array(token_get_entity_mapping('entity', $entity_type));
   $options['context'] = $entity_type;
   // Allow hook_metatag_token_types_alter() to modify the defined tokens.
-  drupal_alter('metatag_token_types', $options);
+  \Drupal::moduleHandler()->alter('metatag_token_types', $options);
 
   // @todo Remove metatag_form_alter() when http://drupal.org/node/1284642 is fixed in core.
   //metatag_metatags_form($form, $instance, $metatags, $options);
@@ -1715,7 +1727,7 @@ function metatag_get_info($type = NULL, $name = NULL) {
   }
   $info = &$drupal_static_fast['metatag_info'];
 
-  global $language;
+  $language = \Drupal::languageManager()->getCurrentLanguage();
   if (!isset($info)) {
     // hook_metatag_info() includes translated strings, so each language is cached
     // separately.
@@ -1727,7 +1739,7 @@ function metatag_get_info($type = NULL, $name = NULL) {
     else {
       // Obtain all metatag specs defined in other modules using
       // hook_metatag_info().
-      $info = module_invoke_all('metatag_info');
+      $info = \Drupal::moduleHandler()->invokeAll('metatag_info', []);
       $info += array('tags' => array(), 'groups' => array());
 
       // Merge in default values.
@@ -1741,7 +1753,7 @@ function metatag_get_info($type = NULL, $name = NULL) {
 
       // Let other modules alter the entity info using
       // hook_metatag_info_alter().
-      drupal_alter('metatag_info', $info);
+      \Drupal::moduleHandler()->alter('metatag_info', $info);
 
       metatag_cache_set($cid, $info);
     }
@@ -1860,7 +1872,7 @@ function metatag_metatag_get_form($metatag, array $data = array(), array $option
 }
 
 function metatag_config_instance_info($instance = NULL) {
-  global $language;
+  $language = \Drupal::languageManager()->getCurrentLanguage();
 
   $info = &drupal_static(__FUNCTION__);
 
@@ -1875,11 +1887,11 @@ function metatag_config_instance_info($instance = NULL) {
     else {
       // Allow modules to act upon the record insertion using
       // hook_metatag_config_instance_info().
-      $info = module_invoke_all('metatag_config_instance_info');
+      $info = \Drupal::moduleHandler()->invokeAll('metatag_config_instance_info', []);
 
       // Allow other modules to customize the data using
       // hook_metatag_config_instance_info_alter().
-      drupal_alter('metatag_config_instance_info', $info);
+      \Drupal::moduleHandler()->alter('metatag_config_instance_info', $info);
 
       metatag_cache_set($cid, $info);
     }
@@ -1981,7 +1993,7 @@ function metatag_config_title($config) {
  * Access callback for meta tag configuration instances.
  */
 function metatag_config_access($op, $config = NULL) {
-  if (!user_access('administer meta tags')) {
+  if (!\Drupal::currentUser()->hasPermission('administer meta tags')) {
     return FALSE;
   }
 
@@ -2021,7 +2033,7 @@ function metatag_config_is_enabled($instance, $include_defaults = FALSE, $includ
 }
 
 /**
- * Wrapper around entity_language() to use LANGUAGE_NONE if the entity does not
+ * Wrapper around entity_language() to use \Drupal\Core\Language\Language::LANGCODE_NOT_SPECIFIED if the entity does not
  * have a language assigned.
  *
  * @param $entity_type
@@ -2042,7 +2054,7 @@ function metatag_entity_get_language($entity_type, $entity) {
   // cause data loss / confusion problems; as a result use the system "no
   // language" value to avoid any potential problems.
   if (empty($langcode)) {
-    $langcode = LANGUAGE_NONE;
+    $langcode = Language::LANGCODE_NOT_SPECIFIED;
   }
 
   return $langcode;
@@ -2076,7 +2088,7 @@ function metatag_views_post_render(&$view, &$output, &$cache) {
   if ($display->display_plugin == 'page' && isset($display->display_options['path'])) {
     // Check if this is an entity display page, if so trigger
     // hook_entity_view().
-    foreach (entity_get_info() as $entity_type => $entity_info) {
+    foreach (\Drupal::entityManager()->getDefinitions() as $entity_type => $entity_info) {
       // Entity paths will include an auto-loader that matches the entity's
       // name, thus the path will be 'some/path/%entity_name'.
       if (isset($entity_info['path']) && ($display->display_options['path'] . $entity_type) == $entity_info['path']) {
@@ -2086,7 +2098,7 @@ function metatag_views_post_render(&$view, &$output, &$cache) {
           // numerical.
           if (!empty($view->args) && is_numeric($view->args[0])) {
             // Only the first argument is used.
-            $entities = entity_load($entity_type, array($view->args[0]));
+            $entities = \Drupal::entityManager()->getStorage($entity_type)->loadMultiple(array($view->args[0]));
             // Only if the entity actually exists.
             if (!empty($entities)) {
               $entity = array_pop($entities);
@@ -2111,7 +2123,7 @@ function metatag_ctools_render_alter(&$info, $page, $context) {
   if ($page && !empty($context['task']['admin path'])) {
     // Check if this is an entity display page, if so trigger
     // hook_entity_view().
-    foreach (entity_get_info() as $entity_type => $entity_info) {
+    foreach (\Drupal::entityManager()->getDefinitions() as $entity_type => $entity_info) {
       // Entity paths will include an auto-loader that matches the entity's
       // name, thus the path will be 'some/path/%entity_name'.
       if (isset($entity_info['path']) && $context['task']['admin path'] == $entity_info['path']) {
@@ -2141,13 +2153,9 @@ function metatag_ctools_render_alter(&$info, $page, $context) {
  * remove the appropriate record when a translation is removed without the
  * corresponding entity record also being removed.
  */
-function metatag_entity_translation_delete($entity_type, $entity, $langcode) {
-  // Get the entity's ID.
-  list($entity_id, $revision_id) = entity_extract_ids($entity_type, $entity);
-  $revision_id = intval($revision_id);
-
+function metatag_entity_translation_delete($entity_type, ContentEntityInterface $entity, $langcode) {
   // Delete the translation.
-  metatag_metatags_delete($entity_type, $entity_id, $revision_id, $langcode);
+  metatag_metatags_delete($entity_type, $entity->id(), $entity->getRevisionId(), $langcode);
 }
 
 /**
@@ -2249,7 +2257,7 @@ function metatag_cache_default_cid_parts(array $cid_parts = array()) {
 
   // Allow other modules to customize the data using
   // hook_metatag_page_cache_cid_parts_alter().
-  drupal_alter('metatag_page_cache_cid_parts', $cid_parts);
+  \Drupal::moduleHandler()->alter('metatag_page_cache_cid_parts', $cid_parts);
 
   // Remove empty parts.
   $cid_parts = array_filter($cid_parts);

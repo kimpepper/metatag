@@ -42,157 +42,6 @@ function _metatag_config_overview_indent($text, $instance) {
   return $text;
 }
 
-function metatag_config_overview() {
-  ctools_include('export');
-
-  $metatags = metatag_get_info('tags');
-
-  $configs = ctools_export_crud_load_all('metatag_config');
-  ksort($configs);
-  //uasort($configs, '_metatag_config_sort');
-
-  $rows = array();
-  foreach ($configs as $config) {
-    $row = array();
-
-    // Style disabled configurations differently.
-    if (!empty($config->disabled)) {
-      $row['class'][] = 'disabled';
-    }
-
-    $details = '<div class="metatag-config-label collapsed"><a href="#" class="toggle-details">' . check_plain(metatag_config_instance_label($config->instance)) . '</a></div>';
-    $details .= '<div class="metatag-config-details js-hide">';
-
-    $inherits = array();
-    $parents = metatag_config_get_parent_instances($config->instance);
-    array_shift($parents);
-    foreach (array_reverse($parents) as $parent) {
-      if (!isset($configs[$parent])) {
-        $rows[$parent] = array(
-          _metatag_config_overview_indent('<div class="metatag-config-label">' . check_plain(metatag_config_instance_label($parent)) . '</div>', $parent),
-          '',
-        );
-      }
-      else {
-        $inherits[$parent] = metatag_config_instance_label($parent);
-        if (!empty($configs[$parent]->disabled)) {
-          $inherits[$parent] .= ' ' . t('(disabled)');
-        }
-      }
-    }
-
-    // Show how this config inherits from its parents.
-    if (!empty($inherits)) {
-      $details .= '<div class="inheritance"><p>' . t('Inherits meta tags from: @parents', array('@parents' => implode(', ', $inherits))) . '</p></div>';
-    }
-
-    // Add a summary of the configuration's defaults.
-    $summary = array();
-    foreach ($config->config as $metatag => $data) {
-      // Skip meta tags that were disabled.
-      if (empty($metatags[$metatag])) {
-        continue;
-      }
-      $summary[] = array(
-        check_plain($metatags[$metatag]['label']) . ':',
-        check_plain(metatag_get_value($metatag, $data, array('raw' => TRUE))),
-      );
-    }
-    if (!empty($summary)) {
-      $details .= theme('table', array(
-        'rows' => $summary,
-        'attributes' => array('class' => array('metatag-value-summary')),
-      ));
-    }
-    else {
-      $details .= '<p class="warning">No overridden default meta tags</p>';
-      $row['class'][] = 'warning';
-    }
-
-    // Close the details div
-    $details .= '</div>';
-
-    // Add indentation to the leading cell based on how many parents the config has.
-    $details = _metatag_config_overview_indent($details, $config->instance);
-
-    $row['data']['details'] = $details;
-
-    $operations = array();
-    if (metatag_config_access('disable', $config)) {
-      $operations['edit'] = array(
-        'title' => ($config->export_type & EXPORT_IN_DATABASE) ? t('Edit') : t('Override'),
-        'href' => 'admin/config/search/metatags/config/' . $config->instance,
-      );
-    }
-    if (metatag_config_access('enable', $config)) {
-      $operations['enable'] = array(
-        'title' => t('Enable'),
-        'href' => 'admin/config/search/metatags/config/' . $config->instance . '/enable',
-        'query' => array(
-          'token' => drupal_get_token('enable-' . $config->instance),
-        ) + drupal_get_destination(),
-      );
-    }
-    if (metatag_config_access('disable', $config)) {
-      $operations['disable'] = array(
-        'title' => t('Disable'),
-        'href' => 'admin/config/search/metatags/config/' . $config->instance . '/disable',
-        'query' => array(
-          'token' => drupal_get_token('disable-' . $config->instance),
-        ) + drupal_get_destination(),
-      );
-    }
-    if (metatag_config_access('revert', $config)) {
-      $operations['revert'] = array(
-        'title' => t('Revert'),
-        'href' => 'admin/config/search/metatags/config/' . $config->instance . '/revert',
-      );
-    }
-    if (metatag_config_access('delete', $config)) {
-      $operations['delete'] = array(
-        'title' => t('Delete'),
-        'href' => 'admin/config/search/metatags/config/' . $config->instance . '/delete',
-      );
-    }
-    $operations['export'] = array(
-      'title' => t('Export'),
-      'href' => 'admin/config/search/metatags/config/' . $config->instance . '/export',
-    );
-    $row['data']['operations'] = array(
-      'data' => array(
-        '#theme' => 'links',
-        '#links' => $operations,
-        '#attributes' => array('class' => array('links', 'inline')),
-      ),
-    );
-
-    $rows[$config->instance] = $row;
-  }
-
-  $build['config_table'] = array(
-    '#theme' => 'table',
-    '#header' => array(
-      'type' => t('Type'),
-      'operations' => t('Operations'),
-    ),
-    '#rows' => $rows,
-    '#empty' => t('No meta tag defaults available yet.'),
-    '#attributes' => array(
-      'class' => array('metatag-config-overview'),
-    ),
-    '#attached' => array(
-      'js' => array(
-        drupal_get_path('module', 'metatag') . '/metatag.admin.js',
-      ),
-      'css' => array(
-        drupal_get_path('module', 'metatag') . '/metatag.admin.css',
-      ),
-    ),
-  );
-
-  return $build;
-}
-
 /**
  * Build an FAPI #options array for the instance select field.
  */
@@ -282,7 +131,7 @@ function metatag_config_edit_form($form, &$form_state, $config) {
       $options['token types'] = array($contexts[0]);
     }
     // Allow hook_metatag_token_types_alter() to modify the defined tokens.
-    drupal_alter('metatag_token_types', $options);
+    \Drupal::moduleHandler()->alter('metatag_token_types', $options);
   }
 
   // Ensure that this configuration is properly compared to its parent 'default'
@@ -309,8 +158,8 @@ function metatag_config_edit_form($form, &$form_state, $config) {
   $form['metatags']['#type'] = 'container';
 
   // Make the token browser available.
-  $form['metatags']['#prefix'] = $form['metatags'][LANGUAGE_NONE]['#description'];
-  unset($form['metatags'][LANGUAGE_NONE]['#description']);
+  $form['metatags']['#prefix'] = $form['metatags'][\Drupal\Core\Language\Language::LANGCODE_NOT_SPECIFIED]['#description'];
+  unset($form['metatags'][\Drupal\Core\Language\Language::LANGCODE_NOT_SPECIFIED]['#description']);
 
   $form['actions']['#type'] = 'actions';
   $form['actions']['save'] = array(
@@ -332,8 +181,8 @@ function metatag_config_edit_form_submit($form, &$form_state) {
   form_state_values_clean($form_state);
   $config = (object) $form_state['values'];
   // @todo Consider renaming the config field from 'config' to 'metatags'
-  $config->config = $config->metatags[LANGUAGE_NONE];
-  unset($config->metatags[LANGUAGE_NONE]);
+  $config->config = $config->metatags[\Drupal\Core\Language\Language::LANGCODE_NOT_SPECIFIED];
+  unset($config->metatags[\Drupal\Core\Language\Language::LANGCODE_NOT_SPECIFIED]);
   metatag_config_save($config);
 
   $label = metatag_config_instance_label($config->instance);
@@ -347,7 +196,9 @@ function metatag_config_enable($config) {
     return MENU_ACCESS_DENIED;
   }
 
-  ctools_export_crud_enable('metatag_config', $config);
+  // @FIXME: The CTools Export API has into core in the form of exportable configuration and content entities. For more information, see https://www.drupal.org/developing/api/entity
+// ctools_export_crud_enable('metatag_config', $config);
+
 
   $label = metatag_config_instance_label($config->instance);
   drupal_set_message(t('The meta tag defaults for @label have been enabled.', array('@label' => $label)));
@@ -359,7 +210,9 @@ function metatag_config_disable($config) {
     return MENU_ACCESS_DENIED;
   }
 
-  ctools_export_crud_disable('metatag_config', $config);
+  // @FIXME: The CTools Export API has into core in the form of exportable configuration and content entities. For more information, see https://www.drupal.org/developing/api/entity
+// ctools_export_crud_disable('metatag_config', $config);
+
 
   $label = metatag_config_instance_label($config->instance);
   drupal_set_message(t('The meta tag defaults for @label have been disabed.', array('@label' => $label)));
@@ -395,8 +248,12 @@ function metatag_config_delete_form_submit($form, &$form_state) {
 }
 
 function metatag_config_export_form($config) {
-  ctools_include('export');
-  return drupal_get_form('ctools_export_form', ctools_export_crud_export('metatag_config', $config), t('Export'));
+  // @FIXME: Most CTools APIs have moved into core. For more information, see https://www.drupal.org/node/2164623
+// ctools_include('export');
+
+  // @FIXME: The CTools Export API has into core in the form of exportable configuration and content entities. For more information, see https://www.drupal.org/developing/api/entity
+// return drupal_get_form('ctools_export_form', ctools_export_crud_export('metatag_config', $config), t('Export'));
+
 }
 
 /**
@@ -408,7 +265,7 @@ function metatag_config_export_form($config) {
 function metatag_bulk_revert_form() {
   // Get the list of entity:bundle options
   $options = array();
-  foreach (entity_get_info() as $entity_type => $entity_info) {
+  foreach (\Drupal::entityManager()->getDefinitions() as $entity_type => $entity_info) {
     foreach (array_keys($entity_info['bundles']) as $bundle) {
       if (metatag_entity_supports_metatags($entity_type, $bundle)) {
         $options[$entity_type . ':' . $bundle] =
@@ -467,7 +324,7 @@ function metatag_bulk_revert_batch_operation($entity_type, $bundle, &$context) {
   }
 
   // Query the selected entity table.
-  $entity_info = entity_get_info($entity_type);
+  $entity_info = \Drupal::entityManager()->getDefinition($entity_type);
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', $entity_type)
     ->propertyCondition($entity_info['entity keys']['id'], $context['sandbox']['current'], '>')
@@ -526,7 +383,7 @@ function metatag_bulk_revert_batch_finished($success, $results, $operations) {
       drupal_set_message(t('No metatags were reverted.'));
     }
     else {
-      $message = theme('item_list', array('items' => $results));
+      $message = _theme('item_list', array('items' => $results));
       drupal_set_message($message);
     }
   }
@@ -563,28 +420,28 @@ function metatag_admin_settings_form() {
     '#type' => 'checkbox',
     '#title' => t('Output meta tags even if only global settings apply'),
     '#description' => t('By default Metatag will load the global default values for all pages that do not have meta tags assigned via the normal entity display or via Metatag Context. This may be disabled so that meta tags will only be output on pages that specifically have meta tags configured for them.'),
-    '#default_value' => variable_get('metatag_load_all_pages', TRUE),
+    '#default_value' => \Drupal::config('metatag.settings')->get('metatag_load_all_pages'),
   );
 
   $form['advanced']['metatag_tag_admin_pages'] = array(
     '#type' => 'checkbox',
     '#title' => t('Output meta tags on admin pages'),
     '#description' => t('By default meta tags will not be output on admin pages, but it may be beneficial for some sites to do so.'),
-    '#default_value' => variable_get('metatag_tag_admin_pages', FALSE),
+    '#default_value' => \Drupal::config('metatag.settings')->get('metatag_tag_admin_pages'),
   );
 
   $form['advanced']['metatag_extended_permissions'] = array(
     '#type' => 'checkbox',
     '#title' => t('Advanced permissions'),
     '#description' => t('Optionally add a permission for each individual meta tag. This provides tremendous flexibility for the editorial process, at the expense of making the permissions configuration more tedious.'),
-    '#default_value' => variable_get('metatag_extended_permissions', FALSE),
+    '#default_value' => \Drupal::config('metatag.settings')->get('metatag_extended_permissions'),
   );
 
   $form['advanced']['metatag_entity_no_lang_default'] = array(
     '#type' => 'checkbox',
     '#title' => t("Don't load entity's default language values if no languages match"),
     '#description' => t("On a site with multiple languages it is possible for an entity to not have meta tag values assigned for the language of the current page. By default the meta tags for an entity's default language value will be used in this scenario, with the canonical URL pointing to the URL. This option may be disabled, i.e. to only load meta tags for languages that specifically have them assigned, otherwise using defaults."),
-    '#default_value' => variable_get('metatag_entity_no_lang_default', FALSE),
+    '#default_value' => \Drupal::config('metatag.settings')->get('metatag_entity_no_lang_default'),
   );
 
   $form['entities'] = array(
@@ -595,13 +452,13 @@ function metatag_admin_settings_form() {
     '#collapsed' => TRUE,
   );
 
-  foreach (entity_get_info() as $entity_name => $entity_info) {
+  foreach (\Drupal::entityManager()->getDefinitions() as $entity_name => $entity_info) {
     // Only show entities that have been enabled via the hooks.
     if (!empty($entity_info['metatags'])) {
       $form['entities']['metatag_enable_' . $entity_name] = array(
         '#type' => 'checkbox',
         '#title' => t($entity_info['label']),
-        '#default_value' => variable_get('metatag_enable_' . $entity_name, TRUE),
+        '#default_value' => \Drupal::config('metatag.settings')->get('metatag_enable_' . $entity_name),
         '#description' => t('Enable meta tags for all pages this entity type.'),
       );
 
@@ -622,7 +479,7 @@ function metatag_admin_settings_form() {
             $form['entities']['metatag_enable_' . $entity_name . '__' . $bundle_name] = array(
               '#type' => 'checkbox',
               '#title' => t($bundle_info['label']),
-              '#default_value' => variable_get('metatag_enable_' . $entity_name . '__' . $bundle_name, isset($bundle_info['metatags']) ? $bundle_info['metatags'] : TRUE),
+              '#default_value' => \Drupal::config('metatag.settings')->get('metatag_enable_' . $entity_name . '__' . $bundle_name),
               '#attributes' => array(
                 // Add some theming that'll indent this bundle.
                 'class' => array('metatag-bundle-checkbox'),

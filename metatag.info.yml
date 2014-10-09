@@ -1,0 +1,8 @@
+name: Metatag
+description: 'Adds support and an API to implement meta tags.'
+package: SEO
+core: 8.x
+dependencies:
+  - 'system (>=7.28)'
+  - token
+type: module

@@ -1,0 +1,22 @@
+metatag.settings:
+  type: mapping
+  label: Settings
+  mapping:
+    admin_language_force_neutral:
+      type: integer
+    metatag_skip_update_7017:
+      type: boolean
+    metatag_extended_permissions:
+      type: boolean
+    metatag_schema_installed:
+      type: boolean
+    metatag_has_revision_id:
+      type: boolean
+    metatag_entity_no_lang_default:
+      type: boolean
+    forum_nav_vocabulary:
+      type: integer
+    metatag_load_all_pages:
+      type: boolean
+    metatag_tag_admin_pages:
+      type: boolean

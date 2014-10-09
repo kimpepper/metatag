@@ -1,0 +1,7 @@
+metatag.overview:
+  path: 'admin/config/search/metatags'
+  defaults:
+    _form: '\Drupal\metatag\Controller\DefaultController::overview'
+    _title: 'Metatag'
+  requirements:
+    _permission: 'administer meta tags'

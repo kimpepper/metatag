@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:600italic,400,700,600' rel='stylesheet' type='text/css' />
+    <style type="text/css">
+    <!--
+
+body {
+  width: 80%;
+  color: #343434;
+  margin: 1em auto;
+  font-family: 'Open Sans', Verdana, sans-serif;
+}
+
+details {
+  font-size: 18px;
+  line-height: 25px;
+  margin-bottom: 2em;
+}
+
+details summary {
+  padding: 1em;
+  margin-bottom: 1em;
+}
+
+details.error summary {
+  background-color: #ffd5d5;
+}
+
+details.warning summary {
+  background-color: #fff3bb;
+}
+
+a {
+  color: #095cb1;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+h5 {
+  font-size: 1em;
+}
+
+aside {
+  font-style: italic;
+  line-height: 20px;
+  font-size: 15px;
+}
+
+var {
+  font-family: mono;
+}
+
+    -->
+    </style>
+  </head>
+  <body>
+        <details class="warning">
+      <summary>Many common functions, shared variables, and constants have been renamed.</summary>
+
+      
+            <h5>Documentation</h5>
+      <ul>
+                <li><a target="_blank" href="https://www.drupal.org/node/2067859"><code>drupal_get_title()</code> and <code>drupal_set_title()</code> were removed</a></li>
+                <li><a target="_blank" href="https://www.drupal.org/node/2181921"><code>drupal_cron_run()</code> was moved into the cron service</a></li>
+                <li><a target="_blank" href="https://www.drupal.org/node/2219113"><code>drupal_json_encode</code> and <code>drupal_json_decode</code> were moved</a></li>
+                <li><a target="_blank" href="https://www.drupal.org/node/2295037"><code>drupal_is_cli()</code> replaced by <code>PHP_SAPI</code> constant</a></li>
+                <li><a target="_blank" href="https://www.drupal.org/node/2302541"><code>drupal_valid_path()</code> was moved into the PathValidator service</a></li>
+                <li><a target="_blank" href="https://www.drupal.org/node/2324935">The global theme variables have been replaced by an ActiveTheme object</a></li>
+                <li><a target="_blank" href="https://www.drupal.org/node/2328179"><code>_node_revision_access()</code> replaced by a service</a></li>
+                <li><a target="_blank" href="https://www.drupal.org/node/2173683">The <code>element_*</code> functions have been replaced by methods of the Element class</a></li>
+                <li><a target="_blank" href="https://www.drupal.org/node/2173787"><code>format_plural()</code> was moved into the translation service</a></li>
+                <li><a target="_blank" href="https://www.drupal.org/node/2328205">Certain Taxonomy API functions have moved into the TermStorage class.</a></li>
+              </ul>
+      
+      
+          </details>
+      <details class="error">
+      <summary>Most CTools APIs have moved into core.</summary>
+
+      
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.admin.inc, line 398</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.admin.inc, line 46</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 272</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 374</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\FunctionReplacement\DisableFunctionCall</aside>    </details>
+      <details class="error">
+      <summary>The CTools Export API has moved into core.</summary>
+
+      
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.admin.inc, line 50</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\FunctionReplacement\DisableFunctionCall</aside>    </details>
+      <details class="error">
+      <summary>The CTools Export API has moved into core.</summary>
+
+      
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.admin.inc, line 399</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\FunctionReplacement\DisableFunctionCall</aside>    </details>
+      <details class="error">
+      <summary>The CTools Export API has moved into core.</summary>
+
+      
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.admin.inc, line 350</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\FunctionReplacement\DisableFunctionCall</aside>    </details>
+      <details class="error">
+      <summary>The CTools Export API has moved into core.</summary>
+
+      
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.admin.inc, line 362</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\FunctionReplacement\DisableFunctionCall</aside>    </details>
+      <details class="error">
+      <summary>The CTools Export API has moved into core.</summary>
+
+      
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 273</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\FunctionReplacement\DisableFunctionCall</aside>    </details>
+      <details class="error">
+      <summary>The CTools Export API has moved into core.</summary>
+
+      
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 375</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\FunctionReplacement\DisableFunctionCall</aside>    </details>
+      <details class="error">
+      <summary>The <kbd>variable</kbd> database table has been removed.</summary>
+
+      
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 634</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 790</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 1197</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\FunctionReplacement\DBLegacyTables</aside>    </details>
+      <details class="error">
+      <summary>The <kbd>variable</kbd> database table has been removed.</summary>
+
+      
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.admin.inc, line 501</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.features.inc, line 62</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 358</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 536</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 609</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 770</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 394</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 422</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 486</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 444</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 464</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 508</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 936</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 1213</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\FunctionReplacement\DBLegacyTables</aside>    </details>
+      <details class="error">
+      <summary>The <kbd>variable</kbd> database table has been removed.</summary>
+
+      
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 437</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 677</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 719</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\FunctionReplacement\DBLegacyTables</aside>    </details>
+      <details class="error">
+      <summary>The <kbd>variable</kbd> database table has been removed.</summary>
+
+      
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 545</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\FunctionReplacement\DBLegacyTables</aside>    </details>
+      <details class="error">
+      <summary><code>entity_get_info()</code> is now a method of the EntityManager service.</summary>
+
+      
+            <h5>Documentation</h5>
+      <ul>
+                <li><a target="_blank" href="https://www.drupal.org/node/1929006"><code>entity_get_info()</code> is deprecated</a></li>
+              </ul>
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.admin.inc, line 411</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.admin.inc, line 470</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.admin.inc, line 598</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.metatag.inc, line 102</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.migrate.inc, line 86</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 2079</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 2114</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 1296</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 1358</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 1452</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 1139</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\FunctionReplacement\EntityGetInfo</aside>    </details>
+      <details class="error">
+      <summary><code>l()</code> has been removed.</summary>
+
+      
+            <h5>Documentation</h5>
+      <ul>
+                <li><a target="_blank" href="https://www.drupal.org/node/2346779"><code>l()</code> replaced by URL generation API</a></li>
+              </ul>
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.metatag.inc, line 188</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\FunctionReplacement\L</aside>    </details>
+      <details class="error">
+      <summary><code>module_invoke_all()</code> is now a method of the <var>module_handler</var> service.</summary>
+
+      
+            <h5>Documentation</h5>
+      <ul>
+                <li><a target="_blank" href="https://www.drupal.org/node/1894902"><code>module_invoke_all()</code> replaced by <var>module_handler</var> service</a></li>
+              </ul>
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 1878</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 345</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 338</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 321</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 606</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 1730</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\FunctionReplacement\ModuleInvokeAll</aside>    </details>
+      <details class="error">
+      <summary><code>theme()</code> has been renamed to <code>_theme()</code>, and should never be called directly.</summary>
+
+      
+            <h5>Documentation</h5>
+      <ul>
+                <li><a target="_blank" href="https://www.drupal.org/node/2195739">theme() renamed to _theme() and should not be called directly</a></li>
+              </ul>
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.admin.inc, line 529</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.admin.inc, line 102</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.theme.inc, line 57</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.theme.inc, line 70</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.theme.inc, line 18</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.theme.inc, line 31</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.theme.inc, line 44</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 1233</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\FunctionReplacement\Theme</aside>    </details>
+      <details class="error">
+      <summary><code>url()</code> has been removed.</summary>
+
+      
+            <h5>Documentation</h5>
+      <ul>
+                <li><a target="_blank" href="https://www.drupal.org/node/2346779"><code>url()</code> replaced by URL generation API</a></li>
+              </ul>
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 18</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 147</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 259</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\FunctionReplacement\URL</aside>    </details>
+      <details class="error">
+      <summary><code>user_access()</code> is now <code>AccountInterface::hasPermission()</code>.</summary>
+
+      
+            <h5>Documentation</h5>
+      <ul>
+                <li><a target="_blank" href="https://www.drupal.org/node/2049309"><code>user_access()</code> got converted to a method on the user/account interface</a></li>
+              </ul>
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 1984</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 692</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 1116</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 1116</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 1185</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 1185</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\FunctionReplacement\UserAccess</aside>    </details>
+      <details class="error">
+      <summary><code>variable_del()</code> has been removed.</summary>
+
+      
+            <h5>Documentation</h5>
+      <ul>
+                <li><a target="_blank" href="https://www.drupal.org/node/2183531">The Variable API has been removed</a></li>
+              </ul>
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 1073</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 1339</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 271</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 274</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 278</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 282</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 267</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 269</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\FunctionReplacement\VariableDel</aside>    </details>
+      <details class="error">
+      <summary><code>variable_get()</code> has been removed.</summary>
+
+      
+            <h5>Documentation</h5>
+      <ul>
+                <li><a target="_blank" href="https://www.drupal.org/node/2183531">The Variable API has been removed</a></li>
+              </ul>
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.admin.inc, line 573</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.admin.inc, line 580</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.admin.inc, line 587</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.admin.inc, line 604</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.admin.inc, line 625</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.admin.inc, line 566</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.metatag.inc, line 26</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 95</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 414</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 426</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 912</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 1184</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 1207</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 1225</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 1378</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 1392</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 1424</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 1548</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 1505</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 142</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 1044</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\FunctionReplacement\VariableGet</aside>    </details>
+      <details class="error">
+      <summary><code>variable_set()</code> has been removed.</summary>
+
+      
+            <h5>Documentation</h5>
+      <ul>
+                <li><a target="_blank" href="https://www.drupal.org/node/2183531">The Variable API has been removed</a></li>
+              </ul>
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.test, line 48</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 416</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 428</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 289</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 1002</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 999</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 1442</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\FunctionReplacement\VariableSet</aside>    </details>
+      <details class="error">
+      <summary><code>watchdog()</code> is scheduled for removal.</summary>
+
+      
+            <h5>Documentation</h5>
+      <ul>
+                <li><a target="_blank" href="https://www.drupal.org/node/2270941"><code>watchdog()</code> is deprecated</a></li>
+              </ul>
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 419</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 431</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.module, line 686</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 596</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 610</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 654</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 732</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 746</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 812</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 951</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 947</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 1109</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 1123</li>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 1290</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\FunctionReplacement\Watchdog</aside>    </details>
+      <details class="error">
+      <summary>Classes must be PSR-4 compliant.</summary>
+
+      
+            <h5>Documentation</h5>
+      <ul>
+                <li><a target="_blank" href="https://www.drupal.org/node/2246699">PSR-4 compatible class loader added to Drupal core</a></li>
+              </ul>
+      
+      
+          </details>
+      <details class="error">
+      <summary>Uninstalling default configuration is handled automatically by core.</summary>
+
+      
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.install, line 262</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\ModuleWide\HookUninstall</aside>    </details>
+      <details class="error">
+      <summary>Module info files' <var>core</var> key must have a value of <kbd>8.x</kbd>.</summary>
+
+      
+            <h5>Documentation</h5>
+      <ul>
+                <li><a target="_blank" href="https://www.drupal.org/node/1935708"><kbd>.info</kbd> files are now <kbd>.info.yml</kbd> files</a></li>
+              </ul>
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.info</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\ModuleWide\InfoToYAML</aside>    </details>
+      <details class="error">
+      <summary>Info files must contain a <var>type</var> key.</summary>
+
+      
+            <h5>Documentation</h5>
+      <ul>
+                <li><a target="_blank" href="https://www.drupal.org/node/1935708#type"><kbd>.info</kbd> files are now <kbd>.info.yml</kbd> files</a></li>
+              </ul>
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.info</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\ModuleWide\InfoToYAML</aside>    </details>
+      <details class="error">
+      <summary>Many common dependencies have moved into core.</summary>
+
+      
+            <h5>Documentation</h5>
+      <ul>
+                <li><a target="_blank" href="https://www.drupal.org/node/1935708"><kbd>.info</kbd> files are now <kbd>.info.yml</kbd> files</a></li>
+              </ul>
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.info</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\ModuleWide\InfoToYAML</aside>    </details>
+      <details class="error">
+      <summary>Modules no longer declare classes in their info file.</summary>
+
+      
+            <h5>Documentation</h5>
+      <ul>
+                <li><a target="_blank" href="https://www.drupal.org/node/1935708#files"><kbd>.info</kbd> files are now <kbd>.info.yml</kbd> files</a></li>
+              </ul>
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.info</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\ModuleWide\InfoToYAML</aside>    </details>
+      <details class="error">
+      <summary>Module info files' <var>configure</var> key must be a route name, not a path.</summary>
+
+      
+            <h5>Documentation</h5>
+      <ul>
+                <li><a target="_blank" href="https://www.drupal.org/node/1935708#configure"><kbd>.info</kbd> files are now <kbd>.info.yml</kbd> files</a></li>
+              </ul>
+      
+            <h5>Files Affected</h5>
+      <ul>
+              <li>/Users/kim/dev/drupal/drupal/modules/metatag/metatag.info</li>
+            </ul>
+      
+      <aside>Flagged by Drupal\drupalmoduleupgrader\Plugin\DMU\ModuleWide\InfoToYAML</aside>    </details>
+      <details class="error">
+      <summary>Page callback functions must be moved into controller classes.</summary>
+
+      
+      
+      
+          </details>
+      <details class="error">
+      <summary>drupal_get_form() is no longer a valid page callback and must be replaced with a route to a class implementing \Drupal\Core\Form\FormInterface.</summary>
+
+      
+      
+      
+          </details>
+      <details class="error">
+      <summary>drupal_get_form() is no longer a valid page callback and must be replaced with a route to a class implementing \Drupal\Core\Form\FormInterface.</summary>
+
+      
+      
+      
+          </details>
+      <details class="error">
+      <summary>Page callback functions must be moved into controller classes.</summary>
+
+      
+      
+      
+          </details>
+      <details class="error">
+      <summary>Page callback functions must be moved into controller classes.</summary>
+
+      
+      
+      
+          </details>
+      <details class="error">
+      <summary>drupal_get_form() is no longer a valid page callback and must be replaced with a route to a class implementing \Drupal\Core\Form\FormInterface.</summary>
+
+      
+      
+      
+          </details>
+      <details class="error">
+      <summary>drupal_get_form() is no longer a valid page callback and must be replaced with a route to a class implementing \Drupal\Core\Form\FormInterface.</summary>
+
+      
+      
+      
+          </details>
+      <details class="error">
+      <summary>Page callback functions must be moved into controller classes.</summary>
+
+      
+      
+      
+          </details>
+      <details class="error">
+      <summary>drupal_get_form() is no longer a valid page callback and must be replaced with a route to a class implementing \Drupal\Core\Form\FormInterface.</summary>
+
+      
+      
+      
+          </details>
+      <details class="error">
+      <summary>drupal_get_form() is no longer a valid page callback and must be replaced with a route to a class implementing \Drupal\Core\Form\FormInterface.</summary>
+
+      
+      
+      
+          </details>
+      <details class="error">
+      <summary>Automated web tests must be in a PSR-4 namespace, and unit tests must be converted to PHPUnit.</summary>
+
+      
+            <h5>Documentation</h5>
+      <ul>
+                <li><a target="_blank" href="https://www.drupal.org/node/1543796">Namespacing of automated tests has changed</a></li>
+                <li><a target="_blank" href="https://www.drupal.org/node/2301125"><code>getInfo()</code> in test classes replaced by doc comments</a></li>
+                <li><a target="_blank" href="https://www.drupal.org/node/1710766">Test classes should define a <code>$modules</code> property declaring dependencies</a></li>
+                <li><a target="_blank" href="https://www.drupal.org/node/1911318">SimpleTest tests now use empty &quot;testing&quot; profile by default</a></li>
+                <li><a target="_blank" href="https://www.drupal.org/node/1829160">New <code>KernelTestBase</code> class for API-level integration tests</a></li>
+                <li><a target="_blank" href="https://www.drupal.org/node/2012184">PHPUnit added to Drupal core</a></li>
+              </ul>
+      
+      
+          </details>
+      </body>
+</html>
