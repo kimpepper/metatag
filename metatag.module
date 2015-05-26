@@ -1368,7 +1368,7 @@ function metatag_entity_supports_metatags($entity_type = NULL, $bundle = NULL) {
     /** @var \Drupal\Core\Entity\EntityTypeInterface $type */
     foreach (\Drupal::entityManager()->getDefinitions() as $type) {
       $metatags = $type->get('metatags');
-      if (empty($metatags) {
+      if (empty($metatags)) {
         $entity_types[$type->id()] = FALSE;
         continue;
       }
