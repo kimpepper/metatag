@@ -1365,16 +1365,16 @@ function metatag_entity_supports_metatags($entity_type = NULL, $bundle = NULL) {
 
   if (!isset($entity_types)) {
     $entity_types = array();
-    /** @var \Drupal\Core\Entity\EntityTypeInterface $type */
-    foreach (\Drupal::entityManager()->getDefinitions() as $type) {
+    $entity_manager = \Drupal::entityManager();
+    foreach ($entity_manager->getDefinitions() as $type) {
       $metatags = $type->get('metatags');
       if (empty($metatags)) {
         $entity_types[$type->id()] = FALSE;
         continue;
       }
       $entity_types[$type->id()] = array();
-      foreach ($type->['bundles'] as $bundle_key => $bundle_info) {
-        $entity_types[$entity_type_key][$bundle_key] = !isset($bundle_info['metatags']) || !empty($bundle_info['metatags']);
+      foreach ($entity_manager->getBundleInfo($type->id()) as $bundle_key => $bundle_info) {
+        $entity_types[$type->id()][$bundle_key] = !isset($bundle_info['metatags']) || !empty($bundle_info['metatags']);
       }
     }
   }
