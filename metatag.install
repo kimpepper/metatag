@@ -253,26 +253,3 @@ function metatag_schema() {
 
   return $schema;
 }
-
-/*
- * Implements hook_uninstall().
- */
-function metatag_uninstall() {
-  // This variable is created via hook_enable.
-  \Drupal::config('metatag.settings')->clear('metatag_schema_installed');
-  // Used to control whether 403/404 pages are cached.
-  \Drupal::config('metatag.settings')->clear('metatag_cache_error_pages');
-  // Used to make meta tags display on admin pages.
-  \Drupal::config('metatag.settings')->clear('metatag_tag_admin_pages');
-
-  // Temp variables, just in case they weren't removed already.
-  \Drupal::config('metatag.settings')->clear('metatag_skip_update_7017');
-
-  // Used to note that the schema for the main {metatag} table were sufficiently
-  // updated.
-  \Drupal::config('metatag.settings')->clear('metatag_has_revision_id');
-
-  // Used to force an entity's default language values to be used if nothing
-  // else matched.
-  \Drupal::config('metatag.settings')->clear('metatag_entity_no_lang_default');
-}
